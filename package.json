@@ -1,0 +1,27 @@
+{
+  "name": "studyfinder-videoapplication",
+  "version": "1.0.0",
+  "description": "End-to-end encryption in video conferences has recently become more paramount than it ever has been. With the surge of COVID-19 cases, video conferencing is being utilized across the world as a means of safe and contact-free communication. Without proper end-to-end encryption, hackers can hijack calls and eavesdrop on sensitive information. Particularly in research and in the medical field, it is important that participants’ and patients’ information is kept safe. The focus of our project is to lay the foundation for safe video calling.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iking7/StudyFinder-VideoApplication.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iking7/StudyFinder-VideoApplication/issues"
+  },
+  "homepage": "https://github.com/iking7/StudyFinder-VideoApplication#readme",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "peer": "^0.6.1",
+    "socket.io": "^4.2.0",
+    "uuid": "^8.3.2"
+  }
+}

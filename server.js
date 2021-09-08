@@ -31,9 +31,7 @@ app.get('/:room', (req, res) => {
 io.on('connection', socket => {
   socket.on('join-room', (roomId, userId) => {
     socket.join(roomId)
-    //Cannot read property 'emit' of undefined
-    //video 1:21:00
-    //socket.to(roomId).broadcast.emit('user-connected', userId);
+    socket.to(roomId).emit("user-connected", userId);
   }); 
 })
 

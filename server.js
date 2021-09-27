@@ -37,7 +37,9 @@ app.get('/:room', (req, res) => {
 io.on('connection', socket => {
   socket.on('join-room', (roomId, userId) => {
     socket.join(roomId)
-    socket.to(roomId).emit('user-connected', userId);
+    socket.on('connection-request', (userId) => {
+        io.to(roomId).emit('new-user-connected',userId);
+    })
     // messages
     socket.on('message', (message) => {
       //send message to the same room
@@ -46,4 +48,4 @@ io.on('connection', socket => {
   })
 })
 
-server.listen(3030); 
+server.listen(3030);

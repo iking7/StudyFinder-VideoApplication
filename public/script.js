@@ -1,5 +1,6 @@
 //JS for front-end goes here
 //mediaDevice is a promice, an event in the futre that will be either resolved or rejected
+
 const socket = io('/')
 const videoGrid = document.getElementById('video-grid');
 const myVideo = document.createElement('video');
@@ -28,8 +29,10 @@ navigator.mediaDevices.getUserMedia({
 		}) 
 	})
 
-	socket.on('user-connected', userId => {
-		connectToNewUser(userId, stream);
+	socket.on('new-user-connected', userId => {
+        if(userId!=peer.id){
+            connectToNewUser(userId,stream);
+        }
 	})
 
 	let text = $("input");
@@ -43,10 +46,10 @@ navigator.mediaDevices.getUserMedia({
 	socket.on("createMessage", message => {
 	  $("ul").append(`<li class="message"><b>user</b><br/>${message}</li>`);
 	})
+
+    socket.emit('connection-request', peer.id);
 })
 
-
-socket.emit('join-room', ROOM_ID);
 
 //automatically generate unique ids using peer object
 peer.on('open', id => {
@@ -66,8 +69,5 @@ const addVideoStream = (video, stream) => {
 	video.addEventListener('loadedmetadata', () => {
 		video.play();
 	})
-
 	videoGrid.append(video)
 }
-
-

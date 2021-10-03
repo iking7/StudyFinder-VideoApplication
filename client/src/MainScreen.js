@@ -2,33 +2,6 @@ import React from "react";
 
 class MainScreen extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.useVideoGrid = React.createRef();
-    }
-
-    addVideoStream(video, stream) {
-        video.srcObject = stream;
-        video.addEventListener('loadedmetadata', () => {
-            video.play();
-        })
-        this.useVideoGrid.current.append(video)
-    }
-
-    componentDidMount() {
-
-        // Get the video stream from the user's webcam
-        const myVideo = document.createElement('video');
-        myVideo.muted = true;
-
-        navigator.mediaDevices.getUserMedia({
-            video: true, //grant access to video
-            audio: true //grant access to audio
-        }).then(stream => {
-            this.addVideoStream(myVideo, stream);
-        })
-    }
-
     render() {
         return (
             <body>

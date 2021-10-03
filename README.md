@@ -89,8 +89,22 @@ socket.io used for real-time data connection (client and server side)
 simple-peer.js for p2p connections
 Material UI for front-end design enhancements (unnecessary)
 react copy to clipboard to copy elements to clipboard
+jquery for user input
 
 # File Information:
 /Package.json - lists out dependencies and requirements to run the application
-/src/index.js - server file built with node and socket.io
+
+/index.js - server file built with node and socket.io
+
+/client/src/index.js - Main React file used to start the react app
+application
+
+/client/src/App.js - Launches the Main screen of the application
+
+/client/src/MainScreen.js - which requests user permission to use
+audio and video, and sets up the display for the UI.
+
+/client/src/SocketContext.js - Holds all client side connection
+logic accessible within the file without needing to rewrite code
+to access user information, state of video room, etc.
 

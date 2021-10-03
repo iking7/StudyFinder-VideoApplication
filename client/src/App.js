@@ -1,10 +1,13 @@
 import React from 'react';
 import './App.css';
-import MainScreen from './MainScreen';
+import {SocketContext} from "./SocketContext";
+import VideoPlayer from "./components/VideoPlayer";
 
 function App() {
   return (
-    <MainScreen />
+    <div>
+      <VideoPlayer/>
+    </div>
   );
 }
 

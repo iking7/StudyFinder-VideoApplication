@@ -68,3 +68,29 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+Project Description:
+
+# StudyFinder-VideoApplication
+End-to-end encryption in video conferences has recently become more paramount than it ever has been. With the surge of COVID-19 cases, video conferencing is being utilized across the world as a means of safe and contact-free communication. Without proper end-to-end encryption, hackers can hijack calls and eavesdrop on sensitive information. Particularly in research and in the medical field, it is important that participants’ and patients’ information is kept safe. The focus of our project is to lay the foundation for safe video calling.
+
+The longterm goal is to create a more secure video conference platform for medical professionals to conduct check-ups, meetings, or research with patients/participants who are at home. For people who do not have easy access to transportation and for people living in high risk COVID areas, individuals need an accessible way to communicate. Additionally, client information can be used by outsiders to harm the patients/participants in numerous ways, and there aren’t any specialized video tools that benefit researchers and medical professionals.
+
+This application is built using react.js for the interface design
+, WebRTC API to exchange real-time audio and video in the browser
+, and simple-peer.js for peer to peer (p2p) connections, and node.js
+ for the server.
+
+# Backend Dependencies list:
+Cross-Origin Resource Sharing (CORS) is an HTTP-header based mechanism that allows a server to indicate any origins (domain, scheme, or port) other than its own from which a browser should permit loading of resources.
+express.js to start server
+nodemon to refresh server when changes are made
+socket.io used for real-time data connection (client and server side)
+simple-peer.js for p2p connections
+Material UI for front-end design enhancements (unnecessary)
+react copy to clipboard to copy elements to clipboard
+
+# File Information:
+/Package.json - lists out dependencies and requirements to run the application
+/src/index.js - server file built with node and socket.io
+

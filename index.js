@@ -24,7 +24,7 @@ app.use(cors());
 //by specifying host and service. We use process.env.PORT incase
 //we are deployed on a host server which sets our environment port
 //for us.
-const PORT = 3030;
+const PORT = 3000;
 
 //static folder inside the public url
 app.use(express.static('public'));

@@ -1,15 +1,21 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import { Grid, Typography, Paper } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { SocketContext } from '../SocketContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 const useStyles = makeStyles((theme) => ({
     video: {
         //width of video stream on non-mobile devices
-        width: '550px',
+        width: '75%',
+        height: '75%',
+        transform: 'scaleX(-1)',
+        position: 'relative',
+        left: '10%',
         [theme.breakpoints.down('xs')]: {
             //width on mobile devices
-            width: '300px',
+            width: 'auto',
+            height: 'auto',
         },
     },
     gridContainer: {
@@ -20,35 +26,69 @@ const useStyles = makeStyles((theme) => ({
             flexDirection: 'column',
         },
     },
-    paper: {
-        //layout surrounding and behind video color
-        padding: '10px',
-        border: '2px solid black',
-        margin: '10px',
-        backgroundColor: 'black',
-    },
 }));
 
 const VideoPlayer = () => {
+    const { myVideo, stream, name, userID, setUsers, setUser, setSignals, setRoom, setStream, setVideos, users, userIDs, roomID, videos, signals, connectToRoom, sendMessage, leaveCall } = useContext(SocketContext);
     const classes = useStyles();
     return (
-       //material ui grid component
-     <Grid container className={useStyles().gridContainer}>
-         {/*Current user video*/}
-         <Paper className={useStyles().paper}>
-            <Grid item xs={12} md={3}>
-                <Typography variant="h5" gutterBottom>Name</Typography>
-                <video playsInline muted ref={null} autoPlay className={useStyles().video}/>
-            </Grid>
-         </Paper>
-         {/*Other videos*/}
-         <Paper className={useStyles().paper}>
-             <Grid item xs={12} md={9}>
-                 <Typography variant="h5" gutterBottom>Name</Typography>
-                 <video playsInline ref={null} autoPlay className={useStyles().video}/>
-             </Grid>
-         </Paper>
-     </Grid>
+        //Body element which covers entire screen
+        <body>
+        {/*material ui grid component*/}
+            <div className={"main"}>
+                <div className={"main__left"}>
+                    <div className={"main__videos"}>
+                        {/*material ui grid component*/}
+                        <Grid container className={classes.gridContainer}>
+                            {/*Current user video*/}
+                                <Grid item xs={12} md={12}>
+                                    <Typography variant="h5" gutterBottom>{name}</Typography>
+                                    <video playsInline muted ref={myVideo} autoPlay className={classes.video}/>
+                                </Grid>
+                        </Grid>
+                    </div>
+                    <div className="main__controls">
+                        <div className="main__controls__block">
+                            <div className="main__controls__button">
+                                <FontAwesomeIcon icon="microphone"/>
+                                <span>Mute</span>
+                            </div>
+                            <div className="main__controls__button">
+                                <FontAwesomeIcon icon="video"/>
+                                <span>Stop Video</span>
+                            </div>
+                        </div>
+                        <div className="main__controls__block">
+                            <div className="main__controls__button">
+                                <FontAwesomeIcon icon="shield-alt"/>
+                                <span>Security</span>
+                            </div>
+                            <div className="main__controls__button">
+                                <FontAwesomeIcon icon="user-friends"/>
+                                <span>Participants</span>
+                            </div>
+                        </div>
+                        <div className="main__controls__block">
+                            <div className="main__controls__button">
+                                <span className="leave_meeting">Leave Meeting</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="main__right">
+                    <div className="main__header">
+                        <h6>Chat</h6>
+                    </div>
+                    <div className="main__chat_window">
+                        <ul className="messages">
+                        </ul>
+                    </div>
+                    <div className="main__message_container">
+                        <input id="chat_message" type="text" placeholder="Type message here..."/>
+                    </div>
+                </div>
+            </div>
+        </body>
    );
 };
 

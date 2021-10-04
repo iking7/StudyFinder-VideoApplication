@@ -9,7 +9,7 @@ import $ from 'jquery';
 const SocketContext = createContext();
 //After server is deployed, we can pass full url of deployed
 //server here
-const socket = io(`http://localhost:3030`);
+const socket = io(`http://localhost:3000`);
 
 const videoGrid = document.getElementById('video-grid');
 
@@ -83,7 +83,7 @@ const ContextProvider = (({ children }) => {
             initiator: newRoom,
             path: '/peerjs',
             host: '/',
-            port: '3030',
+            port: '3000',
             trickle: false,
             stream
         });

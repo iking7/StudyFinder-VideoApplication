@@ -76,10 +76,10 @@ End-to-end encryption in video conferences has recently become more paramount th
 
 The longterm goal is to create a more secure video conference platform for medical professionals to conduct check-ups, meetings, or research with patients/participants who are at home. For people who do not have easy access to transportation and for people living in high risk COVID areas, individuals need an accessible way to communicate. Additionally, client information can be used by outsiders to harm the patients/participants in numerous ways, and there aren’t any specialized video tools that benefit researchers and medical professionals.
 
-This application is built using react.js for the interface design
-, WebRTC API to exchange real-time audio and video in the browser
-, and simple-peer.js for peer to peer (p2p) connections, and node.js
- for the server.
+This application is built using react.js for the interface design, 
+WebRTC API to exchange real-time audio and video in the browser
+through simple-peer.js for peer to peer (p2p) connections, and node
+.js's express.js for the server.
 
 # Backend Dependencies list:
 Cross-Origin Resource Sharing (CORS) is an HTTP-header based mechanism that allows a server to indicate any origins (domain, scheme, or port) other than its own from which a browser should permit loading of resources.
@@ -97,14 +97,15 @@ jquery for user input
 /index.js - server file built with node and socket.io
 
 /client/src/index.js - Main React file used to start the react app
-application
+file.
 
-/client/src/App.js - Launches the Main screen of the application
+/client/src/App.js - Launches the application and loads library
+content.
 
-/client/src/MainScreen.js - which requests user permission to use
-audio and video, and sets up the display for the UI.
+/client/src/components/VideoPlayer.js - Sets up the UI for the video
+player, chat, and buttons.
 
 /client/src/SocketContext.js - Holds all client side connection
 logic accessible within the file without needing to rewrite code
-to access user information, state of video room, etc.
-
+to access user information, state of video room, etc. Also, requests
+user permission to use audio and video, and gets streams for the UI.

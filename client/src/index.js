@@ -9,9 +9,9 @@ import { ContextProvider } from './SocketContext';
 //peer.js.
  ReactDOM.render(
      <ContextProvider>
-        <React.StrictMode>
+
             <App />
-        </React.StrictMode>
+
      </ContextProvider>,
    document.getElementById('root')
  );

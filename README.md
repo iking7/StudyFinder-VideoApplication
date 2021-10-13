@@ -109,3 +109,6 @@ player, chat, and buttons.
 logic accessible within the file without needing to rewrite code
 to access user information, state of video room, etc. Also, requests
 user permission to use audio and video, and gets streams for the UI.
+
+To continue development, cd to client folder and ensure
+ dependencies found in package.json are installed using npm. 

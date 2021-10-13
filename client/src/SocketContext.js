@@ -93,7 +93,7 @@ const ContextProvider = (({ children }) => {
             socket.emit('connectedToCall', {
                 name: name,
                 userID: userID,
-                signal: signal
+                signal: signal,
             });
             user.set(name, userID);
             setUser(user);
@@ -128,7 +128,7 @@ const ContextProvider = (({ children }) => {
             initiator: newRoom,
             path: '/peerjs',
             host: '/',
-            port: '3030',
+            port: '3000',
             trickle: false,
             stream
         });

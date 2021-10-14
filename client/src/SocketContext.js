@@ -102,6 +102,7 @@ const ContextProvider = (({ children }) => {
             allSignals.set(userID, signal);
             setSignals(allSignals);
         });
+
         //add user's video stream to room
         peer.on('stream', (userID, userVideoStream) => {
             user.set(name, userID);

@@ -112,3 +112,7 @@ user permission to use audio and video, and gets streams for the UI.
 
 To continue development, cd to client folder and ensure
  dependencies found in package.json are installed using npm. 
+
+To use the icon from fontawesome: run command line:
+$ npm i --save @fortawesome/free-solid-svg-icons
+$ npm i --save @fortawesome/react-fontawesome

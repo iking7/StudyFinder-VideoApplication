@@ -1,17 +1,8 @@
+// Import the functions you need from the SDKs you need
+// v9 compat packages are API compatible with v8 code
+
 import React from 'react';
+import App from "./App";
 import ReactDOM from 'react-dom';
-import App from './App.js';
-import { ContextProvider } from './SocketContext';
 
-//The react application will control everything inside the root
-//division tag in the html document. We use the context provider
-//to access the connection and video data obtained using socket and
-//peer.js.
- ReactDOM.render(
-     <ContextProvider>
-
-            <App />
-
-     </ContextProvider>,
-   document.getElementById('root')
- );
+ReactDOM.render(<App/>, document.getElementById('root'));

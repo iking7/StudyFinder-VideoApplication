@@ -163,3 +163,9 @@ video {
 .leave_meeting {
   color: #EB534B;
 }
+
+.answerButton {
+  width: 90%;
+  margin-left: 10px;
+  margin-right: 10px;
+}

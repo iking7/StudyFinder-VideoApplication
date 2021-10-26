@@ -213,9 +213,9 @@ const App = () => {
         }
     }
 
-    const muteUnmute = (stream) => {
-        const enabled = stream.getAudioTracks()[0].enabled;
-        stream.getAudioTracks()[0].enabled = !enabled;
+    const muteUnmute = () => {
+        const enabled = localStream.getAudioTracks()[0].enabled;
+        localStream.getAudioTracks()[0].enabled = !enabled;
     }
 
     const toggleVideo = () => {
@@ -267,10 +267,6 @@ const App = () => {
                             />
                         </div>
                         <div className="main__controls__block">
-                            {/* <div className="main__controls__button">
-                                <FontAwesomeIcon icon="shield-alt" />
-                                <span>Security</span>
-                                </div> */}
                             <div
                                 className="main__controls__button">
                                 {/*Icon imported for participants*/}
@@ -313,12 +309,12 @@ const App = () => {
                 </button>
             </div>
             <div className="main__left">
-                <input id="callInput"/>
+                <input id="callInput" />
+            </div>
+            <div className="main__right2">
                 <button id="answerButton"
                         onClick={a.answerButton}>Answer
                 </button>
-            </div>
-            <div className="main__right2">
             </div>
         </div>
         </body>

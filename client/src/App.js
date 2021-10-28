@@ -1,16 +1,16 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { faVideo, faMicrophone, faShieldAlt, faUserFriends } from '@fortawesome/free-solid-svg-icons'
+import { faVideo, faVideoSlash, faMicrophone, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 // Import the functions you need from the SDKs you need
 // v9 compat packages are API compatible with v8 code
 import 'firebase/compat/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
 
-library.add(fab, faVideo, faMicrophone, faShieldAlt, faUserFriends)
+library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoSlash)
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -55,9 +55,9 @@ let remoteVideo = document.getElementById('remoteVideo');
 
 // 1. Setup media sources
 class AppStreamCam extends React.Component {
-    constructor(props) {
-        super(props);
-        this.streamLocalCamVideo = this.streamLocalCamVideo.bind(this)
+
+    leaveMeeting() {
+        window.close();
     }
 
     async streamLocalCamVideo() {
@@ -78,12 +78,12 @@ class AppStreamCam extends React.Component {
         pc.addTrack(lsTracks[0], localStream);
         pc.addTrack(lsTracks[1], localStream);
 
-
         pc.ontrack = (event) => {
             const tracks = event.streams[0].getTracks();
             remoteStream.addTrack(tracks[0]);
             remoteStream.addTrack(tracks[1]);
         };
+
         webcamVideo = document.getElementById('webcamVideo');
         remoteVideo = document.getElementById('remoteVideo');
         webcamVideo.srcObject = localStream;
@@ -193,42 +193,55 @@ class AppStreamCam extends React.Component {
 
 const App = () => {
     const a = new AppStreamCam();
-    const [off, setOff] = useState(false);
-    const [iconName1, setIconName1] = useState('microphone')
-    const [iconName2, setIconName2] = useState('video')
-    const [textName1, setTextName1] = useState('Mute')
-    const [textName2, setTextName2] = useState('Stop Video')
+    const [vid, setVid] = useState("video");
+    const [mic, setMic] = useState("microphone");
+    const [audio, setAudio] = useState(webcamVideo === null);
+    const [video, setVideo] = useState(webcamVideo === null);
 
-    const toggleMute = () => {
-        if (!off) {
-            setOff(true)
-            setIconName1('microphone-slash')
-            setTextName1('Unmute')
-            muteUnmute()
-        } else {
-            setOff(false)
-            setIconName1('microphone')
-            setTextName1('Mute')
-            muteUnmute()
-        }
+    function toggleAudio() {
+        setAudio(!audio);
     }
 
-    const muteUnmute = () => {
-        const enabled = localStream.getAudioTracks()[0].enabled;
-        localStream.getAudioTracks()[0].enabled = !enabled;
+    function toggleVideo() {
+
+        setVideo(!video);
     }
 
-    const toggleVideo = () => {
-        if (!off) {
-            setOff(true)
-            setIconName2('video-slash')
-            setTextName2('Start Video')
-        } else {
-            setOff(false)
-            setIconName2('video')
-            setTextName2('Stop Video')
-        }
-    }
+    useEffect(() => {
+        (async function() {
+            if (webcamVideo && webcamVideo.srcObject.getAudioTracks()) {
+                if (audio) {
+                    await setMic("microphone");
+                } else {
+                    await setMic("microphone-alt-slash");
+                }
+                webcamVideo.srcObject.getAudioTracks()[0].enabled = audio;
+            } else {
+                await a.streamLocalCamVideo();
+                if (webcamVideo && webcamVideo.srcObject.getAudioTracks()) {
+                    await setMic("microphone");
+                } else {
+                    await setMic("microphone-alt-slash");
+                }
+            }
+            if (webcamVideo && webcamVideo.srcObject.getVideoTracks()) {
+                if (video) {
+                    await setVid("video");
+                } else {
+                    await setVid("video-slash");
+                }
+                webcamVideo.srcObject.getVideoTracks()[0].enabled = video;
+            } else {
+                await a.streamLocalCamVideo();
+                if (webcamVideo && webcamVideo.srcObject.getVideoTracks()) {
+                    await setVid("video");
+                } else {
+                    await setVid("video-slash");
+                }
+            }
+        })();
+    }, [audio, video, mic, vid]);
+
     return (
         //Body element which covers entire screen
         <body>
@@ -252,19 +265,23 @@ const App = () => {
                     <div className={"main__videos"}>
                     </div>
                     <div className="main__controls">
-                        <div className="main__controls__block">
-                            <BottomButton value={0}
-                                          toggle={() => toggleMute()}
-                                          name={iconName1}
-                                          text={textName1}
-                                          off={off} // for debug
-                            />
-                            <BottomButton value={1}
-                                          toggle={() => toggleVideo()}
-                                          name={iconName2}
-                                          text={textName2}
-                                          off={off}
-                            />
+                        <div className="main__controls__block"
+                             onClick={toggleAudio}>
+                            <div
+                                className="main__controls__button">
+                                <FontAwesomeIcon icon={mic}>
+                                </FontAwesomeIcon>
+                                <span>Microphone</span>
+                            </div>
+                        </div>
+                        <div className="main__controls__block"
+                             onClick={toggleVideo}>
+                            <div
+                                className="main__controls__button">
+                                <FontAwesomeIcon icon={vid}>
+                                </FontAwesomeIcon>
+                                <span>Video Camera</span>
+                            </div>
                         </div>
                         <div className="main__controls__block">
                             <div
@@ -279,7 +296,7 @@ const App = () => {
                             <div
                                 className="main__controls__button">
                                 {/*Leave meeting button*/}
-                                <span className="leave_meeting">Leave Meeting</span>
+                                <span className="leave_meeting" onClick={a.leaveMeeting}>Leave Meeting</span>
                             </div>
                         </div>
                     </div>
@@ -297,7 +314,7 @@ const App = () => {
                 </div>
                 <div className="main__message_container">
                     <input id="chat_message" type="text"
-                           placeholder="Type message here..."/>
+                           placeholder="Type message here..." onSubmit={a.chatRender}/>
                 </div>
             </div>
         </div>
@@ -309,7 +326,7 @@ const App = () => {
                 </button>
             </div>
             <div className="main__left">
-                <input id="callInput" />
+                <input id="callInput"/>
             </div>
             <div className="main__right2">
                 <button id="answerButton"
@@ -321,14 +338,7 @@ const App = () => {
     );
 }
 
-function BottomButton(props) {
-    return (
-        <div className="main__controls__button" onClick={props.toggle}>
-            {/*Icon imported for microphone */}
-            <FontAwesomeIcon icon={props.name} />
-            <span>{props.text}</span>
-        </div>
-    )
-}
+//We can include gif for loading screen when another user has not
+//connected yet: https://www.google.com/search?q=loading+dots+gif&client=safari&rls=en&sxsrf=AOaemvLaRE5rG2ZzKUCW-exXKymFw8mXNQ:1635404637385&source=lnms&tbm=isch&sa=X&ved=2ahUKEwj4nuaDxezzAhW_STABHbGbBO4Q_AUoAXoECAEQAw&biw=1440&bih=686&dpr=2#imgrc=SLjfp2efSU-4zM&imgdii=pNxQvo5VJxlcLM
 
 export default App;

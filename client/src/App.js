@@ -9,6 +9,8 @@ import 'firebase/compat/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
+import {v4 as uuid} from "uuid";
+import { useParams } from 'react-router';
 
 library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoSlash)
 
@@ -19,13 +21,13 @@ library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoS
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDh2DYiOUe_Z5-qWY0aIRDNpoLNbtXbeNM",
-    authDomain: "studyfind-e50ae.firebaseapp.com",
-    projectId: "studyfind-e50ae",
-    storageBucket: "studyfind-e50ae.appspot.com",
-    messagingSenderId: "447557245777",
-    appId: "1:447557245777:web:09b136ad99c6f6e3509170",
-    measurementId: "G-VQC2NK0BQM"
+    apiKey: "AIzaSyAJYBTf-1nflC6OzN-YsJkHYqjiEbuzGSc",
+    authDomain: "test-2616d.firebaseapp.com",
+    projectId: "test-2616d",
+    storageBucket: "test-2616d.appspot.com",
+    messagingSenderId: "843279575262",
+    appId: "1:843279575262:web:f2fcf2c1b136abdd537a4f",
+    measurementId: "G-SH8P1JGHWJ"
 };
 
 if (!firebase.apps.length) {
@@ -61,6 +63,7 @@ class AppStreamCam extends React.Component {
     }
 
     async streamLocalCamVideo() {
+        console.log('stream')
         const constraints = {
             audio: true,
             video: {width: 1280, height: 720}
@@ -89,11 +92,13 @@ class AppStreamCam extends React.Component {
         webcamVideo.srcObject = localStream;
         remoteVideo.srcObject = remoteStream;
 
+        
     }
 
 // 2. Create an offer
-    async callButton() {
+    async callButton(roomID) {
         // Reference Firestore collections for signaling
+        console.log('call')
         const callDoc = firestore.collection('calls').doc();
         const offerCandidates = callDoc.collection('offerCandidates');
         const answerCandidates = callDoc.collection('answerCandidates');
@@ -139,8 +144,9 @@ class AppStreamCam extends React.Component {
     };
 
     // 3. Answer the call with the unique ID
-    async answerButton() {
+    async answerButton(roomID) {
         callInput = document.getElementById('callInput');
+        console.log('answered')
         if (callInput.value !== "") {
             const callId = callInput.value;
             const callDoc = firestore.collection('calls').doc(callId);
@@ -191,8 +197,13 @@ class AppStreamCam extends React.Component {
     }
 }
 
-const App = () => {
+const App = (props) => {
     const a = new AppStreamCam();
+    let roomID = useParams().roomID
+    console.log(roomID)
+    console.log(this.props)
+
+
     const [vid, setVid] = useState("video");
     const [mic, setMic] = useState("microphone");
     const [audio, setAudio] = useState(webcamVideo === null);
@@ -239,6 +250,7 @@ const App = () => {
                     await setVid("video-slash");
                 }
             }
+
         })();
     }, [audio, video, mic, vid]);
 

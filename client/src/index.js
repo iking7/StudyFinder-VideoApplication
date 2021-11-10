@@ -3,6 +3,23 @@
 
 import React from 'react';
 import App from "./App";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ReactDOM from 'react-dom';
+import { v4 as uuid } from "uuid";
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+const rootElement = document.getElementById("root");
+let url = "/room/" + uuid()
+if (window.location.pathname == '/') {
+    let call = true
+} else {
+    let call = false
+}
+ReactDOM.render(
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate replace to={url} />} />
+        <Route path="/room/:roomID" element={<App calling={call}/>} />
+      </Routes>
+    </BrowserRouter>,
+  rootElement
+);

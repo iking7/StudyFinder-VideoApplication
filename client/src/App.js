@@ -9,7 +9,6 @@ import 'firebase/compat/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
-import {v4 as uuid} from "uuid";
 import { useParams } from 'react-router';
 
 library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoSlash)
@@ -21,13 +20,13 @@ library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoS
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyAJYBTf-1nflC6OzN-YsJkHYqjiEbuzGSc",
-    authDomain: "test-2616d.firebaseapp.com",
-    projectId: "test-2616d",
-    storageBucket: "test-2616d.appspot.com",
-    messagingSenderId: "843279575262",
-    appId: "1:843279575262:web:f2fcf2c1b136abdd537a4f",
-    measurementId: "G-SH8P1JGHWJ"
+    apiKey: "AIzaSyDh2DYiOUe_Z5-qWY0aIRDNpoLNbtXbeNM",
+    authDomain: "studyfind-e50ae.firebaseapp.com",
+    projectId: "studyfind-e50ae",
+    storageBucket: "studyfind-e50ae.appspot.com",
+    messagingSenderId: "447557245777",
+    appId: "1:447557245777:web:09b136ad99c6f6e3509170",
+    measurementId: "G-VQC2NK0BQM"
 };
 
 if (!firebase.apps.length) {
@@ -50,8 +49,6 @@ let localStream = null;
 let remoteStream = null;
 
 // HTML elements
-let answerButton = document.getElementById('answerButton');
-let callInput = document.getElementById('callInput');
 let webcamVideo = document.getElementById('webcamVideo');
 let remoteVideo = document.getElementById('remoteVideo');
 
@@ -98,13 +95,9 @@ class AppStreamCam extends React.Component {
 // 2. Create an offer
     async callButton(roomID) {
         // Reference Firestore collections for signaling
-        console.log('call')
-        const callDoc = firestore.collection('calls').doc();
+        const callDoc = firestore.collection('calls').doc(roomID);
         const offerCandidates = callDoc.collection('offerCandidates');
         const answerCandidates = callDoc.collection('answerCandidates');
-        callInput = document.getElementById('callInput');
-        callInput.value = callDoc.id;
-
         // Get candidates for caller, save to db
         pc.onicecandidate = (event) => {
             event.candidate && offerCandidates.add(event.candidate.toJSON());
@@ -139,70 +132,60 @@ class AppStreamCam extends React.Component {
                 }
             });
         });
-        answerButton = document.getElementById('answerButton');
-        answerButton.disabled = false;
     };
 
     // 3. Answer the call with the unique ID
     async answerButton(roomID) {
-        callInput = document.getElementById('callInput');
-        console.log('answered')
-        if (callInput.value !== "") {
-            const callId = callInput.value;
-            const callDoc = firestore.collection('calls').doc(callId);
-            const answerCandidates = callDoc.collection('answerCandidates');
-            const offerCandidates = callDoc.collection('offerCandidates');
+        const callDoc = firestore.collection('calls').doc(roomID);
+        const answerCandidates = callDoc.collection('answerCandidates');
+        const offerCandidates = callDoc.collection('offerCandidates');
 
-            pc.onicecandidate = async (event) => {
-                (await event.candidate) && await answerCandidates.add(event.candidate.toJSON());
-            };
+        pc.onicecandidate = async (event) => {
+            (await event.candidate) && await answerCandidates.add(event.candidate.toJSON());
+        };
 
-            const callData = (await callDoc.get()).data();
+        const callData = (await callDoc.get()).data();
 
-            const offerDescription = callData.offer;
-            await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        const offerDescription = callData.offer;
+        await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(await answerDescription);
+        const answerDescription = await pc.createAnswer();
+        await pc.setLocalDescription(await answerDescription);
 
-            const answer = {
-                sdp: (await answerDescription).sdp,
-                type: (await answerDescription).type,
-            };
+        const answer = {
+            sdp: (await answerDescription).sdp,
+            type: (await answerDescription).type,
+        };
 
-            await callDoc.update({answer});
+        await callDoc.update({answer});
 
-            offerCandidates.onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    console.log(change);
-                    if (change.type === 'added') {
-                        let data = change.doc.data();
-                        pc.addIceCandidate(new RTCIceCandidate(data));
-                    }
-                });
+        offerCandidates.onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                console.log(change);
+                if (change.type === 'added') {
+                    let data = change.doc.data();
+                    pc.addIceCandidate(new RTCIceCandidate(data));
+                }
             });
+        });
 
-            remoteStream = new MediaStream();
-            pc.ontrack = (event) => {
-                event.streams[0].getTracks().forEach((track) => {
-                    remoteStream.addTrack(track);
-                    const video2 = document.getElementById("remoteVideo");
-                    video2.srcObject = event.streams[0];
-                    video2.onloadedmetadata = function (e) {
-                        video2.play();
-                    };
-                });
-            }
+        remoteStream = new MediaStream();
+        pc.ontrack = (event) => {
+            event.streams[0].getTracks().forEach((track) => {
+                remoteStream.addTrack(track);
+                const video2 = document.getElementById("remoteVideo");
+                video2.srcObject = event.streams[0];
+                video2.onloadedmetadata = function (e) {
+                    video2.play();
+                };
+            });
         }
     }
 }
 
-const App = (props) => {
+function App(props) {
     const a = new AppStreamCam();
     let roomID = useParams().roomID
-    console.log(roomID)
-    console.log(this.props)
-
 
     const [vid, setVid] = useState("video");
     const [mic, setMic] = useState("microphone");
@@ -251,8 +234,15 @@ const App = (props) => {
                 }
             }
 
+            if (props.call) {
+                a.callButton(roomID)
+            } else {
+                a.answerButton(roomID)
+            }
+
         })();
     }, [audio, video, mic, vid]);
+
 
     return (
         //Body element which covers entire screen
@@ -328,22 +318,6 @@ const App = (props) => {
                     <input id="chat_message" type="text"
                            placeholder="Type message here..." onSubmit={a.chatRender}/>
                 </div>
-            </div>
-        </div>
-        {/* Calling Options */}
-        <div className="main__bottom">
-            <div className="main__left">
-                <button id="callButton"
-                        onClick={a.callButton}>Create Call (offer)
-                </button>
-            </div>
-            <div className="main__left">
-                <input id="callInput"/>
-            </div>
-            <div className="main__right2">
-                <button id="answerButton"
-                        onClick={a.answerButton}>Answer
-                </button>
             </div>
         </div>
         </body>

@@ -9,16 +9,17 @@ import { v4 as uuid } from "uuid";
 
 const rootElement = document.getElementById("root");
 let url = "/room/" + uuid()
-if (window.location.pathname == '/') {
-    let call = true
+if (window.location.pathname === '/') {
+    var call = true
 } else {
-    let call = false
+    var call = false
 }
+
 ReactDOM.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate replace to={url} />} />
-        <Route path="/room/:roomID" element={<App calling={call}/>} />
+        <Route path="/room/:roomID" element={<App call={call}/>} />
       </Routes>
     </BrowserRouter>,
   rootElement

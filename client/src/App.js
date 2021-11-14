@@ -1,13 +1,16 @@
-import React, {useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import './App.css';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faVideo, faVideoSlash, faMicrophone, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 // Import the functions you need from the SDKs you need
 // v9 compat packages are API compatible with v8 code
 import 'firebase/compat/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import 'firebase/analytics';
 import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
 
 library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoSlash)
@@ -31,7 +34,10 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
+
+//const auth = firebase.auth();
 const firestore = firebase.firestore();
+//const analytics = firebase.analytics();
 
 const servers = {
     iceServers: [
@@ -46,10 +52,8 @@ const servers = {
 const pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
-
+var userName = null
 // HTML elements
-let answerButton = document.getElementById('answerButton');
-let callInput = document.getElementById('callInput');
 let webcamVideo = document.getElementById('webcamVideo');
 let remoteVideo = document.getElementById('remoteVideo');
 
@@ -61,6 +65,7 @@ class AppStreamCam extends React.Component {
     }
 
     async streamLocalCamVideo() {
+        console.log('stream')
         const constraints = {
             audio: true,
             video: {width: 1280, height: 720}
@@ -89,17 +94,15 @@ class AppStreamCam extends React.Component {
         webcamVideo.srcObject = localStream;
         remoteVideo.srcObject = remoteStream;
 
+
     }
 
 // 2. Create an offer
-    async callButton() {
+    async callButton(roomID) {
         // Reference Firestore collections for signaling
-        const callDoc = firestore.collection('calls').doc();
+        const callDoc = firestore.collection('calls').doc(roomID);
         const offerCandidates = callDoc.collection('offerCandidates');
         const answerCandidates = callDoc.collection('answerCandidates');
-        callInput = document.getElementById('callInput');
-        callInput.value = callDoc.id;
-
         // Get candidates for caller, save to db
         pc.onicecandidate = (event) => {
             event.candidate && offerCandidates.add(event.candidate.toJSON());
@@ -134,69 +137,79 @@ class AppStreamCam extends React.Component {
                 }
             });
         });
-        answerButton = document.getElementById('answerButton');
-        answerButton.disabled = false;
     };
 
     // 3. Answer the call with the unique ID
-    async answerButton() {
-        callInput = document.getElementById('callInput');
-        if (callInput.value !== "") {
-            const callId = callInput.value;
-            const callDoc = firestore.collection('calls').doc(callId);
-            const answerCandidates = callDoc.collection('answerCandidates');
-            const offerCandidates = callDoc.collection('offerCandidates');
+    async answerButton(roomID) {
+        const callDoc = firestore.collection('calls').doc(roomID);
+        const answerCandidates = callDoc.collection('answerCandidates');
+        const offerCandidates = callDoc.collection('offerCandidates');
 
-            pc.onicecandidate = async (event) => {
-                (await event.candidate) && await answerCandidates.add(event.candidate.toJSON());
-            };
+        pc.onicecandidate = async (event) => {
+            (await event.candidate) && await answerCandidates.add(event.candidate.toJSON());
+        };
 
-            const callData = (await callDoc.get()).data();
+        const callData = (await callDoc.get()).data();
 
-            const offerDescription = callData.offer;
-            await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+        const offerDescription = callData.offer;
+        await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(await answerDescription);
+        const answerDescription = await pc.createAnswer();
+        await pc.setLocalDescription(await answerDescription);
 
-            const answer = {
-                sdp: (await answerDescription).sdp,
-                type: (await answerDescription).type,
-            };
+        const answer = {
+            sdp: (await answerDescription).sdp,
+            type: (await answerDescription).type,
+        };
 
-            await callDoc.update({answer});
+        await callDoc.update({answer});
 
-            offerCandidates.onSnapshot((snapshot) => {
-                snapshot.docChanges().forEach((change) => {
-                    console.log(change);
-                    if (change.type === 'added') {
-                        let data = change.doc.data();
-                        pc.addIceCandidate(new RTCIceCandidate(data));
-                    }
-                });
+        offerCandidates.onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                console.log(change);
+                if (change.type === 'added') {
+                    let data = change.doc.data();
+                    pc.addIceCandidate(new RTCIceCandidate(data));
+                }
             });
+        });
 
-            remoteStream = new MediaStream();
-            pc.ontrack = (event) => {
-                event.streams[0].getTracks().forEach((track) => {
-                    remoteStream.addTrack(track);
-                    const video2 = document.getElementById("remoteVideo");
-                    video2.srcObject = event.streams[0];
-                    video2.onloadedmetadata = function (e) {
-                        video2.play();
-                    };
-                });
-            }
+        remoteStream = new MediaStream();
+        pc.ontrack = (event) => {
+            event.streams[0].getTracks().forEach((track) => {
+                remoteStream.addTrack(track);
+                const video2 = document.getElementById("remoteVideo");
+                video2.srcObject = event.streams[0];
+                video2.onloadedmetadata = function (e) {
+                    video2.play();
+                };
+            });
         }
     }
 }
 
-const App = () => {
+function SetUsername() {
+  let text;
+  let person = prompt("Please enter your username:", "First Last");
+  if (person == null || person == "") {
+    return "Unknown User";
+  } else {
+    return person;
+  }
+}
+
+function MainRoom() {
     const a = new AppStreamCam();
+    let roomID = useParams().roomID;
+
     const [vid, setVid] = useState("video");
     const [mic, setMic] = useState("microphone");
     const [audio, setAudio] = useState(webcamVideo === null);
     const [video, setVideo] = useState(webcamVideo === null);
+
+    if (userName == null) {
+        userName = SetUsername();
+    }
 
     function toggleAudio() {
         setAudio(!audio);
@@ -206,6 +219,38 @@ const App = () => {
 
         setVideo(!video);
     }
+
+    const dummy = useRef();
+    const messagesRef = firestore.collection('messages');
+    const query = messagesRef.orderBy('createdAt').limitToLast(25);
+    const [messages] = useCollectionData(query, { idField: 'id' });
+
+    const [formValue, setFormValue] = useState('');
+
+
+    const sendMessage = async (e) => {
+      e.preventDefault();
+      const uid = userName;
+      await messagesRef.add({
+        text: formValue,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        uid
+      })
+      setFormValue('');
+      dummy.current.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function ChatMessage(props) {
+      const {text, uid} = props.message;
+
+      const messageClass = (uid == userName) ? 'sent' : 'received';
+      return (<>
+        <div className={`message ${messageClass}`}>
+          <p>{uid + ": " + text}</p>
+        </div>
+      </>)
+    }
+
 
     useEffect(() => {
         (async function() {
@@ -239,6 +284,13 @@ const App = () => {
                     await setVid("video-slash");
                 }
             }
+
+            if (props.call) {
+                a.callButton(roomID)
+            } else {
+                a.answerButton(roomID)
+            }
+
         })();
     }, [audio, video, mic, vid]);
 
@@ -302,7 +354,6 @@ const App = () => {
                     </div>
                 </div>
             </div>
-
             {/*Chat window content*/}
             <div className="main__right">
                 <div className="main__header">
@@ -310,31 +361,30 @@ const App = () => {
                 </div>
                 <div className="main__chat_window">
                     <ul className="messages">
+                      {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
+                      <span ref={dummy}></span>
                     </ul>
                 </div>
                 <div className="main__message_container">
-                    <input id="chat_message" type="text"
-                           placeholder="Type message here..." onSubmit={a.chatRender}/>
+                    <form onSubmit={sendMessage}>
+                      <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="say something nice" />
+                      <button type="submit" disabled={!formValue}>Enter</button>
+                    </form>
+
                 </div>
             </div>
         </div>
-        {/* Calling Options */}
-        <div className="main__bottom">
-            <div className="main__left">
-                <button id="callButton"
-                        onClick={a.callButton}>Create Call (offer)
-                </button>
-            </div>
-            <div className="main__left">
-                <input id="callInput"/>
-            </div>
-            <div className="main__right2">
-                <button id="answerButton"
-                        onClick={a.answerButton}>Answer
-                </button>
-            </div>
-        </div>
         </body>
+    );
+}
+// Will be useful for the signin function we will add later
+function App() {
+    return (
+      <div className="App">
+        <section>
+          <MainRoom />
+        </section>
+      </div>
     );
 }
 

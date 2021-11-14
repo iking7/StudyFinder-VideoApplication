@@ -143,9 +143,26 @@ video {
   overflow-y: auto;
 }
 
-.messages{
-  color: white;
+
+
+.message {
+  display: flex;
+  align-items: center;
   list-style: none;
+}
+
+.sent {
+  flex-direction: row-reverse;
+}
+
+.sent p {
+  color: green;
+  /* background: #0b93f6; */
+  align-self: flex-end;
+}
+.received p {
+  /* background: #e5e5ea; */
+  color: white;
 }
 
 .main__message_container {

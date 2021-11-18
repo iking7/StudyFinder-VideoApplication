@@ -1,16 +1,13 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faVideo, faVideoSlash, faMicrophone, faUserFriends } from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
 // Import the functions you need from the SDKs you need
 // v9 compat packages are API compatible with v8 code
 import 'firebase/compat/auth';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-import 'firebase/analytics';
 import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
 import { useParams } from 'react-router';
 
@@ -35,10 +32,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
-
-//const auth = firebase.auth();
 const firestore = firebase.firestore();
-//const analytics = firebase.analytics();
 
 const servers = {
     iceServers: [
@@ -53,7 +47,7 @@ const servers = {
 const pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
-var userName = null
+
 // HTML elements
 let webcamVideo = document.getElementById('webcamVideo');
 let remoteVideo = document.getElementById('remoteVideo');
@@ -95,7 +89,7 @@ class AppStreamCam extends React.Component {
         webcamVideo.srcObject = localStream;
         remoteVideo.srcObject = remoteStream;
 
-
+        
     }
 
 // 2. Create an offer
@@ -189,28 +183,14 @@ class AppStreamCam extends React.Component {
     }
 }
 
-function SetUsername() {
-  let text;
-  let person = prompt("Please enter your username:", "First Last");
-  if (person == null || person == "") {
-    return "Unknown User";
-  } else {
-    return person;
-  }
-}
-
-function MainRoom(props) {
+function App(props) {
     const a = new AppStreamCam();
-    let roomID = useParams().roomID;
+    let roomID = useParams().roomID
 
     const [vid, setVid] = useState("video");
     const [mic, setMic] = useState("microphone");
     const [audio, setAudio] = useState(webcamVideo === null);
     const [video, setVideo] = useState(webcamVideo === null);
-
-    if (userName == null) {
-        userName = SetUsername();
-    }
 
     function toggleAudio() {
         setAudio(!audio);
@@ -220,38 +200,6 @@ function MainRoom(props) {
 
         setVideo(!video);
     }
-
-    const dummy = useRef();
-    const messagesRef = firestore.collection('messages');
-    const query = messagesRef.orderBy('createdAt').limitToLast(25);
-    const [messages] = useCollectionData(query, { idField: 'id' });
-
-    const [formValue, setFormValue] = useState('');
-
-
-    const sendMessage = async (e) => {
-      e.preventDefault();
-      const uid = userName;
-      await messagesRef.add({
-        text: formValue,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        uid
-      })
-      setFormValue('');
-      dummy.current.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function ChatMessage(props) {
-      const {text, uid} = props.message;
-
-      const messageClass = (uid == userName) ? 'sent' : 'received';
-      return (<>
-        <div className={`message ${messageClass}`}>
-          <p>{uid + ": " + text}</p>
-        </div>
-      </>)
-    }
-
 
     useEffect(() => {
         (async function() {
@@ -294,6 +242,7 @@ function MainRoom(props) {
 
         })();
     }, [audio, video, mic, vid]);
+
 
     return (
         //Body element which covers entire screen
@@ -355,6 +304,7 @@ function MainRoom(props) {
                     </div>
                 </div>
             </div>
+
             {/*Chat window content*/}
             <div className="main__right">
                 <div className="main__header">
@@ -362,30 +312,15 @@ function MainRoom(props) {
                 </div>
                 <div className="main__chat_window">
                     <ul className="messages">
-                      {messages && messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
-                      <span ref={dummy}></span>
                     </ul>
                 </div>
                 <div className="main__message_container">
-                    <form onSubmit={sendMessage}>
-                      <input value={formValue} onChange={(e) => setFormValue(e.target.value)} placeholder="say something nice" />
-                      <button type="submit" disabled={!formValue}>Enter</button>
-                    </form>
-
+                    <input id="chat_message" type="text"
+                           placeholder="Type message here..." onSubmit={a.chatRender}/>
                 </div>
             </div>
         </div>
         </body>
-    );
-}
-// Will be useful for the signin function we will add later
-function App(props) {
-    return (
-      <div className="App">
-        <section>
-          <MainRoom props={props} />
-        </section>
-      </div>
     );
 }
 

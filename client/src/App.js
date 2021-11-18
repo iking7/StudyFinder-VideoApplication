@@ -12,6 +12,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import 'firebase/analytics';
 import {faMicrophoneAltSlash} from "@fortawesome/free-solid-svg-icons/faMicrophoneAltSlash";
+import { useParams } from 'react-router';
 
 library.add(faVideo, faMicrophone, faUserFriends, faMicrophoneAltSlash, faVideoSlash)
 
@@ -198,7 +199,7 @@ function SetUsername() {
   }
 }
 
-function MainRoom() {
+function MainRoom(props) {
     const a = new AppStreamCam();
     let roomID = useParams().roomID;
 
@@ -378,11 +379,11 @@ function MainRoom() {
     );
 }
 // Will be useful for the signin function we will add later
-function App() {
+function App(props) {
     return (
       <div className="App">
         <section>
-          <MainRoom />
+          <MainRoom props={props} />
         </section>
       </div>
     );

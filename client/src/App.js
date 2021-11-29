@@ -285,11 +285,11 @@ function MainRoom(props) {
                     await setVid("video-slash");
                 }
             }
-
+            
             if (props.call) {
-                a.callButton(roomID)
+                a.callButton(roomID);
             } else {
-                a.answerButton(roomID)
+                a.answerButton(roomID);
             }
 
         })();
@@ -383,7 +383,7 @@ function App(props) {
     return (
       <div className="App">
         <section>
-          <MainRoom props={props} />
+          <MainRoom call={props.call} />
         </section>
       </div>
     );

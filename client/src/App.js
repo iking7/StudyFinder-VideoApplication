@@ -222,7 +222,7 @@ function MainRoom(props) {
     }
 
     const dummy = useRef();
-    const messagesRef = firestore.collection('messages');
+    const messagesRef = firestore.collection('calls').doc(roomID).collection('messages');
     const query = messagesRef.orderBy('createdAt').limitToLast(25);
     const [messages] = useCollectionData(query, { idField: 'id' });
 

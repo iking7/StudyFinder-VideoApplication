@@ -339,15 +339,6 @@ function MainRoom(props) {
                         <div className="main__controls__block">
                             <div
                                 className="main__controls__button">
-                                {/*Icon imported for participants*/}
-                                <FontAwesomeIcon
-                                    icon="user-friends"/>
-                                <span>Participants</span>
-                            </div>
-                        </div>
-                        <div className="main__controls__block">
-                            <div
-                                className="main__controls__button">
                                 {/*Leave meeting button*/}
                                 <span className="leave_meeting" onClick={a.leaveMeeting}>Leave Meeting</span>
                             </div>
